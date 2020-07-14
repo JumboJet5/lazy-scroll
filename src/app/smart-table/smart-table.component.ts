@@ -19,6 +19,10 @@ export class SmartTableComponent implements OnInit {
     setInterval(() => this._updateData(), this._updateInterval);
   }
 
+  public getItemId(index, item: { id: number, data: number }): number {
+    return item && item.id;
+  }
+
   private _updateData(): void {
     console.log('------Updating------');
     this.data$.next(new Array(this._arraySize).fill(true).map((_, id) => ({id, data: Math.random() * 10})));

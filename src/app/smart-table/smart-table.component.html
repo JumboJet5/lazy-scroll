@@ -1,3 +1,3 @@
 <cdk-virtual-scroll-viewport [itemSize]="50" [minBufferPx]="250" [maxBufferPx]="400" class="example-viewport">
-  <app-smart-raw *cdkVirtualFor="let item of data$ | async; templateCacheSize: 200" class="example-item" [item]="item"></app-smart-raw>
+  <app-smart-raw *cdkVirtualFor="let item of data$ | async; trackBy: getItemId; templateCacheSize: 36;" class="example-item" [item]="item"></app-smart-raw>
 </cdk-virtual-scroll-viewport>
