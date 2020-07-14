@@ -18,7 +18,7 @@ export class SmartRawComponent implements OnInit, OnDestroy {
   @Input()
   public set item(value: { id: number; data: number }) {
     this._item = value;
-    // console.log(`Update item #${this._item ? this._item.id : 'unknown'}:`, this._item);
+    console.log(`Update item #${this._item ? this._item.id : 'unknown'}:`, this._item);
   }
 
   ngOnInit(): void {

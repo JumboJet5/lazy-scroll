@@ -1,5 +1,11 @@
+import { CollectionViewer, DataSource, ListRange } from '@angular/cdk/collections';
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+
+export interface IItem {
+  id: number;
+  data: number;
+}
 
 @Component({
   selector: 'app-smart-table',
@@ -8,23 +14,52 @@ import { Subject } from 'rxjs';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SmartTableComponent implements OnInit {
-  public data$: Subject<{ id: number, data: number }[]> = new Subject<{ id: number, data: number }[]>();
-  private _arraySize = 100;
-  private _updateInterval = 1000;
+  public data: MyDataSource = new MyDataSource();
 
   constructor() { }
 
   ngOnInit(): void {
-    this._updateData();
-    setInterval(() => this._updateData(), this._updateInterval);
   }
 
-  public getItemId(index, item: { id: number, data: number }): number {
-    return item && item.id;
+  public getItemId(index, item: IItem): number {
+    return !!item ? item.id : index;
+  }
+}
+
+export class MyDataSource extends DataSource<IItem> {
+  private _updateInterval = 1000;
+  private _arraySize = 100;
+  private _pageSize = 20;
+  private _cachedData = Array.from<IItem>({length: this._arraySize})
+    .map((_, id) => ({id, data: Math.random() * 10}));
+  private _dataStream = new BehaviorSubject<(IItem)[]>(this._cachedData);
+  private _subscription = new Subscription();
+  private _range: ListRange = {start: 0, end: this._pageSize};
+
+  constructor() {
+    super();
+    this._updatePage();
+    setInterval(() => this._updatePage(), this._updateInterval);
   }
 
-  private _updateData(): void {
-    console.log('------Updating------');
-    this.data$.next(new Array(this._arraySize).fill(true).map((_, id) => ({id, data: Math.random() * 10})));
+  connect(collectionViewer: CollectionViewer): Observable<(IItem)[]> {
+    this._subscription.add(collectionViewer.viewChange.subscribe(range => {
+      this._range = range;
+      this._updatePage();
+    }));
+    return this._dataStream;
+  }
+
+  disconnect(): void {
+    this._subscription.unsubscribe();
+  }
+
+  private _updatePage(range: ListRange = this._range): void {
+    console.log('------Updating------', range);
+    const length = range.end - range.start;
+    this._cachedData.splice(range.start, length,
+      ...Array.from({length})
+        .map((_, id) => ({id: id + range.start, data: Math.random() * 10})));
+    this._dataStream.next(this._cachedData);
   }
 }
