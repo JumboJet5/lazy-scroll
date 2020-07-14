@@ -55,7 +55,7 @@ export class MyDataSource extends DataSource<IItem> {
   }
 
   private _updatePage(range: ListRange = this._range): void {
-    console.log('------Updating------', range);
+    // console.log('------Updating------', range);
     const length = range.end - range.start;
     this._cachedData.splice(range.start, length,
       ...Array.from({length})
